@@ -4,9 +4,56 @@
 """
 Escriba el codigo que ejecute la accion solicitada en cada pregunta.
 """
+import os
+import pandas as pd
+
+
+def unzip():
+    import zipfile
+
+    if os.path.exists("./files/input"):
+        os.system("rm -r ./files/input")
+
+    with zipfile.ZipFile("./files/input.zip", "r") as zip_folder:
+        zip_folder.extractall("./files/input")
+
+        return print("Se descomprimió el zip")
+
+
+def save_df(data, reference):
+    df = pd.DataFrame(data)
+    os.makedirs("./files/output", exist_ok=True)
+    output_file = os.path.join("./files/output", f"{reference}_dataset.csv")
+    df.to_csv(output_file, index=False)
+
+
+def folder_process():
+    feelings = ["negative", "positive", "neutral"]
+    base_path = ["./files/input/input/train/", "./files/input/input/test/"]
+
+    for folder in base_path:
+        data = []
+        for feeling in feelings:
+            dirs = os.path.join(folder, feeling)
+
+            txt_files = [
+                f"{dirs}/{file}"
+                for file in pd.io.common.os.listdir(dirs)
+                if file.endswith(".txt")
+            ]
+
+            for file in txt_files:
+                with open(file, "r", encoding="utf-8") as f:
+                    phrase = f.read().strip()
+                    if phrase:
+                        data.append({"phrase": phrase, "target": feeling})
+
+        save_df(data, folder.split("/")[-2])
 
 
 def pregunta_01():
+    unzip()
+    folder_process()
     """
     La información requerida para este laboratio esta almacenada en el
     archivo "files/input.zip" ubicado en la carpeta raíz.
@@ -71,3 +118,6 @@ def pregunta_01():
 
 
     """
+
+
+pregunta_01()
